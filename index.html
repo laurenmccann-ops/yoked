@@ -869,11 +869,14 @@ function showTab(tab,btn,pushHistory=true){
   document.getElementById('main-scroll').scrollTop=0;
   dismissKeyboard();
   if(pushHistory)history.pushState({tab},'','/');
-  if(tab==='home')renderHome();
-  if(tab==='log')renderLog();
-  if(tab==='progress')renderProgress();
-  if(tab==='history')renderHistory();
-  if(tab==='beasts')renderBeasts();
+  // Use requestAnimationFrame to ensure DOM is updated before rendering
+  requestAnimationFrame(()=>{
+    if(tab==='home')renderHome();
+    if(tab==='log')renderLog();
+    if(tab==='progress')renderProgress();
+    if(tab==='history')renderHistory();
+    if(tab==='beasts')renderBeasts();
+  });
 }
 
 // Handle browser back button
@@ -1937,10 +1940,8 @@ function renderProgress(){
   document.getElementById('progress-user-pills').innerHTML=d.users.map(u=>`<button class="user-pill ${activeUser===u.id?'selected':''}"
     style="${activeUser===u.id?`background:${u.color};border-color:${u.color};`:`border-color:${u.color};color:${u.color};`}"
     onclick="setProgUser('${u.id}')">${u.name}</button>`).join('');
-  // Only re-render charts if progress tab is actually visible
-  if(document.getElementById('page-progress').classList.contains('active')){
-    renderProgContent();
-  }
+  // Always render content when renderProgress is called
+  renderProgContent();
 }
 
 function setProgUser(uid){activeUser=uid;renderProgress();}
@@ -4319,10 +4320,7 @@ function importAllData(){
     if(changed){save(d);console.log('Migration done!');}
   })();
   // Ensure home renders properly on first load
-  setTimeout(()=>{
-    const home=document.getElementById('page-home');
-    if(home&&home.classList.contains('active'))renderHome();
-  },50);
+  requestAnimationFrame(()=>renderHome());
 })();
 </script>
 
